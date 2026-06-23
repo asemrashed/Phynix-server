@@ -1,0 +1,67 @@
+import type { VideoProvider } from "@fxprime/types"
+
+export function parseYoutubeId(input: string): string | null {
+  const trimmed = input.trim()
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed
+
+  const patterns = [
+    /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+  ]
+
+  for (const pattern of patterns) {
+    const match = trimmed.match(pattern)
+    if (match?.[1]) return match[1]
+  }
+
+  return null
+}
+
+export function parseVimeoId(input: string): string | null {
+  const trimmed = input.trim()
+  if (/^\d+$/.test(trimmed)) return trimmed
+
+  const match = trimmed.match(/vimeo\.com\/(?:video\/)?(\d+)/)
+  return match?.[1] ?? null
+}
+
+export function resolveLessonVideo(lesson: {
+  videoProvider: string | null
+  videoRef: string | null
+  vimeoId: string | null
+}): { provider: VideoProvider; ref: string | null } {
+  const provider = (lesson.videoProvider as VideoProvider | null) || "VIMEO"
+
+  if (lesson.videoRef?.trim()) {
+    return { provider, ref: lesson.videoRef.trim() }
+  }
+
+  if (lesson.vimeoId?.trim()) {
+    return { provider: "VIMEO", ref: lesson.vimeoId.trim() }
+  }
+
+  return { provider, ref: null }
+}
+
+export function buildYoutubeEmbedUrl(videoId: string, startSeconds?: number): string {
+  const params = new URLSearchParams({
+    rel: "0",
+    modestbranding: "1",
+    playsinline: "1",
+    enablejsapi: "1",
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  })
+
+  if (startSeconds && startSeconds > 0) {
+    params.set("start", String(Math.floor(startSeconds)))
+  }
+
+  return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`
+}
+
+export function getVideoMimeType(storageKey: string): string {
+  const ext = storageKey.split(".").pop()?.toLowerCase()
+  if (ext === "webm") return "video/webm"
+  if (ext === "mov") return "video/quicktime"
+  return "video/mp4"
+}

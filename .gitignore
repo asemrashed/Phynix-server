@@ -1,0 +1,19 @@
+node_modules/
+dist/
+uploads/
+packages/types/node_modules/
+packages/types/dist/
+
+# Secrets — stay local only, never push to GitHub
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Safe to commit (templates)
+!.env.example
+!deploy/.ngrok-env.example
+
+# ngrok token — VPS only
+deploy/.ngrok-env
+deploy/credentials.env

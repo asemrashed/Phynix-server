@@ -1,0 +1,52 @@
+name: fxprime
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: fxprime-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  backend:
+    image: ${BACKEND_IMAGE:-adnanh7/fx-prime-backend:main}
+    container_name: fxprime-backend
+    restart: unless-stopped
+    env_file:
+      - ${BACKEND_ENV_FILE:-/var/www/fxprime/backend.env}
+    environment:
+      NODE_ENV: production
+      PORT: "4005"
+      REDIS_URL: redis://redis:6379
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:4005:4005"
+    volumes:
+      - ${UPLOADS_DIR:-/var/www/fxprime/uploads}:/app/uploads
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  frontend:
+    image: ${FRONTEND_IMAGE:-adnanh7/fx-prime-frontend:main}
+    container_name: fxprime-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3005"
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "127.0.0.1:3005:3005"
+    depends_on:
+      backend:
+        condition: service_started
+
+volumes:
+  redis_data:

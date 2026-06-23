@@ -1,0 +1,7 @@
+version: "3"
+agent:
+  authtoken: ${NGROK_AUTHTOKEN}
+tunnels:
+  fxprime:
+    addr: 8088
+    proto: http

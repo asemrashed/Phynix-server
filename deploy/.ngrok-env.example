@@ -1,0 +1,3 @@
+# Copy to /var/www/fxprime/backend/deploy/.ngrok-env on the VPS, then run:
+#   bash /var/www/fxprime/backend/deploy/ngrok-setup.sh
+NGROK_AUTHTOKEN=your_ngrok_authtoken_here

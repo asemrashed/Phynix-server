@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+dist
+uploads
+packages/types/node_modules
+packages/types/dist
+.env
+.env.local
+.env.production
+.env.*.local
+deploy/.ngrok-env
+*.log
+coverage
