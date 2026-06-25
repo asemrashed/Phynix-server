@@ -8,7 +8,6 @@ import type {
   LessonType,
   StudentEnrollmentItem,
   StudentLessonDetail,
-  VideoProvider,
 } from "@fxprime/types"
 import { parseCourseFaqs } from "../lib/course-marketing"
 import { computeContinueLessonState } from "../lib/continue-learning"
@@ -277,6 +276,8 @@ export async function getCourseBySlug(
         duration: l.duration,
         order: l.order,
         isFree: l.isFree,
+        previewAvailable:
+          l.isFree && l.type === "VIDEO" && Boolean(l.videoRef?.trim()),
         isCompleted: lessonProgressMap[l.id]?.isCompleted,
         watchPosition: lessonProgressMap[l.id]?.watchPosition,
       })),
@@ -435,10 +436,7 @@ export async function getStudentLesson(
       isPassed && meta.review ? meta : null
     )
   } else {
-    content = {
-      provider: (lesson.videoProvider as VideoProvider) || "YOUTUBE",
-      videoRef: lesson.videoRef,
-    }
+    content = { ready: true }
   }
 
   return {

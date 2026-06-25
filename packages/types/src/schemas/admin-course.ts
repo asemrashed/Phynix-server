@@ -40,7 +40,7 @@ export const createCourseSchema = z.object({
   currency: z.literal("BDT").optional(),
   level: courseLevelSchema,
   language: z.string().trim().min(2, "Language is required"),
-  instructorId: z.string().uuid("Select an instructor"),
+  instructorId: z.string().uuid().optional(),
 })
 
 export const updateCourseSchema = createCourseSchema.partial().extend({

@@ -223,6 +223,14 @@ function mapMarketingInput(data: CourseMarketingInput) {
   return mapped
 }
 
+export async function resolveDefaultInstructorId(): Promise<string> {
+  const instructors = await listInstructors()
+  if (instructors.length === 0) {
+    throw Object.assign(new Error("No instructor profile available"), { code: "NO_INSTRUCTOR" })
+  }
+  return instructors[0].id
+}
+
 export async function createCourse(data: {
   title: string
   slug: string
@@ -244,14 +252,15 @@ export async function createCourse(data: {
   currency?: string
   level: CourseLevel
   language: string
-  instructorId: string
+  instructorId?: string
 }) {
   const existing = await prisma.course.findUnique({ where: { slug: data.slug } })
   if (existing) {
     throw Object.assign(new Error("Slug already exists"), { code: "SLUG_EXISTS" })
   }
 
-  const instructor = await prisma.instructor.findUnique({ where: { id: data.instructorId } })
+  const instructorId = data.instructorId ?? (await resolveDefaultInstructorId())
+  const instructor = await prisma.instructor.findUnique({ where: { id: instructorId } })
   if (!instructor) {
     throw Object.assign(new Error("Instructor not found"), { code: "NOT_FOUND" })
   }
@@ -269,7 +278,7 @@ export async function createCourse(data: {
       currency: data.currency || "BDT",
       level: data.level,
       language: data.language,
-      instructorId: data.instructorId,
+      instructorId,
       status: "DRAFT",
     },
   })

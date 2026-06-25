@@ -3,19 +3,11 @@ import { randomUUID } from "crypto"
 import { prisma } from "../lib/prisma"
 import { getCached, setCached } from "../lib/cache"
 import {
-  buildYoutubeEmbedUrl,
   resolveLessonVideo,
 } from "../lib/video-source"
 import { assertInstallmentCourseAccess } from "./installment-access.service"
 
 const TOKEN_TTL_SECONDS = 4 * 60 * 60
-
-function getApiBaseUrl(): string {
-  return (
-    process.env.API_PUBLIC_URL ||
-    `http://localhost:${process.env.PORT || 4000}/api/v1`
-  )
-}
 
 type VideoAccessContext = {
   enrollment: {
@@ -96,6 +88,7 @@ async function buildVideoTokenResponse(
       courseId,
       provider,
       videoRef: ref,
+      watchPosition,
     },
     TOKEN_TTL_SECONDS
   )
@@ -109,16 +102,7 @@ async function buildVideoTokenResponse(
     isCompleted: lessonProgress?.isCompleted ?? false,
   }
 
-  if (provider === "YOUTUBE") {
-    const embedUrl = buildYoutubeEmbedUrl(
-      ref,
-      watchPosition > 0 ? watchPosition : undefined
-    )
-    return { ...base, embedUrl }
-  }
-
-  const streamUrl = `${getApiBaseUrl()}/courses/${courseId}/lessons/${lessonId}/stream?session=${sessionToken}`
-  return { ...base, streamUrl }
+  return { ...base }
 }
 
 export async function getVideoToken(
@@ -156,6 +140,7 @@ export async function validateVideoStreamSession(sessionToken: string) {
     courseId: string
     provider: string
     videoRef: string
+    watchPosition?: number
   }>(`video_session:${sessionToken}`)
   if (!session) {
     throw Object.assign(new Error("Invalid or expired video session"), { code: "INVALID_SESSION" })

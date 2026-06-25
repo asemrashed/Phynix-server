@@ -23,14 +23,24 @@ export function resolveLessonVideo(lesson: {
 }): { provider: VideoProvider; ref: string | null } {
   const provider = (lesson.videoProvider as VideoProvider | null) || "YOUTUBE"
 
-  if (lesson.videoRef?.trim()) {
-    return { provider, ref: lesson.videoRef.trim() }
+  if (!lesson.videoRef?.trim()) {
+    return { provider, ref: null }
   }
 
-  return { provider, ref: null }
+  const raw = lesson.videoRef.trim()
+  if (provider === "YOUTUBE") {
+    const videoId = parseYoutubeId(raw)
+    if (!videoId) {
+      return { provider, ref: null }
+    }
+    return { provider, ref: videoId }
+  }
+
+  return { provider, ref: raw }
 }
 
-export function buildYoutubeEmbedUrl(videoId: string, startSeconds?: number): string {
+export function buildYoutubeEmbedUrl(videoRef: string, startSeconds?: number): string {
+  const videoId = parseYoutubeId(videoRef) || videoRef
   const params = new URLSearchParams({
     rel: "0",
     modestbranding: "1",

@@ -48,6 +48,11 @@ router.get(
   touchDeviceSession,
   videoController.getToken
 )
+router.post(
+  "/:courseId/lessons/:lessonId/play-meta",
+  videoController.getPlayMeta
+)
+router.get("/:courseId/lessons/:lessonId/embed", videoController.serveVideoEmbed)
 router.get("/:courseId/lessons/:lessonId/stream", videoController.streamVideo)
 
 export default router
