@@ -1,7 +1,7 @@
 -- SiteSettings was added to the schema without a prior CREATE migration.
 CREATE TABLE IF NOT EXISTS "SiteSettings" (
     "id" TEXT NOT NULL DEFAULT 'default',
-    "supportEmail" TEXT NOT NULL DEFAULT 'support@fxprimeacademy.com',
+    "supportEmail" TEXT NOT NULL DEFAULT 'support@phynixeducation.com',
     "officeAddress" JSONB NOT NULL DEFAULT '{"line1":"128 City Road","line2":"London, EC1V 2NX"}',
     "officeHours" TEXT NOT NULL DEFAULT 'Mon–Sat, 10:00 AM – 6:00 PM (BDT)',
     "whatsappNumber" TEXT,

@@ -890,7 +890,7 @@ model ContactInquiry {
 
 model SiteSettings {
   id             String   @id @default("default")
-  supportEmail   String   @default("support@fxprimeacademy.com")
+  supportEmail   String   @default("support@phynixeducation.com")
   officeAddress  Json     @default("{\"line1\":\"128 City Road\",\"line2\":\"London, EC1V 2NX\"}")
   officeHours    String   @default("Mon–Sat, 10:00 AM – 6:00 PM (BDT)")
   whatsappNumber   String?

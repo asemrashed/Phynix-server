@@ -19,7 +19,7 @@ classes, practical assignments, community support, and verified certificates.
 </ul>
 <h2>Contact</h2>
 <p>
-Email: <a href="mailto:support@fxprimeacademy.com">support@fxprimeacademy.com</a><br />
+Email: <a href="mailto:support@phynixeducation.com">support@phynixeducation.com</a><br />
 Address: 128 City Road, London, EC1V 2NX<br />
 <a href="/contact">Send us a message</a>
 </p>`
@@ -74,16 +74,16 @@ payment details are handled by certified payment gateways — we do not store ca
 <h2>Your Rights</h2>
 <p>
 You may request access, correction, or deletion of your personal data by emailing
-support@fxprimeacademy.com.
+support@phynixeducation.com.
 </p>
 <h2>Contact</h2>
-<p>FX Prime Academy — support@fxprimeacademy.com</p>`
+<p>FX Prime Academy — support@phynixeducation.com</p>`
 
 const REFUND_HTML = `<p>Last updated: June 2026</p>
 <h2>Digital Courses &amp; Products</h2>
 <p>
 Refund requests for digital courses and products may be submitted within 7 days of purchase
-if less than 20% of the course content has been accessed. Contact support@fxprimeacademy.com
+if less than 20% of the course content has been accessed. Contact support@phynixeducation.com
 with your order details.
 </p>
 <h2>Consultation &amp; Mentorship</h2>
@@ -119,7 +119,7 @@ You can control cookies through your browser settings. Disabling essential cooki
 affect platform functionality such as staying logged in.
 </p>
 <h2>Contact</h2>
-<p>Questions about cookies: support@fxprimeacademy.com</p>`
+<p>Questions about cookies: support@phynixeducation.com</p>`
 
 const CONTACT_FAQ = [
   {
@@ -513,7 +513,7 @@ export async function seedSiteCms(prisma: PrismaClient) {
     where: { id: "default" },
     create: {
       id: "default",
-      supportEmail: "support@fxprimeacademy.com",
+      supportEmail: "support@phynixeducation.com",
       officeAddress: { line1: "128 City Road", line2: "London, EC1V 2NX" },
       officeHours: "Mon–Sat, 10:00 AM – 6:00 PM (BDT)",
       contactFaq: CONTACT_FAQ,

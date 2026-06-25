@@ -37,9 +37,9 @@ export async function main() {
 
   console.log("\nSeed completed successfully!\n")
   console.log("Login credentials (password: password123):")
-  console.log("  SUPER_ADMIN  → superadmin@fxprimeacademy.com")
-  console.log("  ADMIN        → admin@fxprimeacademy.com")
-  console.log("  INSTRUCTOR   → instructor@fxprimeacademy.com")
+  console.log("  SUPER_ADMIN  → superadmin@phynixeducation.com")
+  console.log("  ADMIN        → admin@phynixeducation.com")
+  console.log("  INSTRUCTOR   → instructor@phynixeducation.com")
   console.log("  Adnan (PRO)  → adnan@example.com")
   console.log("  Rashed       → rashed@example.com")
   console.log("  Demo student → student@fxprime.test")

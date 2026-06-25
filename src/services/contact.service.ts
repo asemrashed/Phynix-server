@@ -65,7 +65,7 @@ export async function submitContactInquiry(input: SubmitContactInput) {
 
   const mapped = mapInquiry(inquiry)
   const supportEmail =
-    process.env.CONTACT_SUPPORT_EMAIL || "support@fxprimeacademy.com"
+    process.env.CONTACT_SUPPORT_EMAIL || "support@phynixeducation.com"
 
   await Promise.all([
     sendContactInquiryNotificationEmail({

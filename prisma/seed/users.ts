@@ -6,10 +6,10 @@ export type SeedUsers = Awaited<ReturnType<typeof seedUsers>>
 
 export async function seedUsers(prisma: PrismaClient, passwordHash: string) {
   const superAdmin = await prisma.user.upsert({
-    where: { email: "superadmin@fxprimeacademy.com" },
+    where: { email: "superadmin@phynixeducation.com" },
     update: { role: "SUPER_ADMIN", isVerified: true, passwordHash },
     create: {
-      email: "superadmin@fxprimeacademy.com",
+      email: "superadmin@phynixeducation.com",
       passwordHash,
       role: "SUPER_ADMIN",
       isVerified: true,
@@ -17,10 +17,10 @@ export async function seedUsers(prisma: PrismaClient, passwordHash: string) {
   })
 
   const adminUser = await prisma.user.upsert({
-    where: { email: "admin@fxprimeacademy.com" },
+    where: { email: "admin@phynixeducation.com" },
     update: { role: "ADMIN", isVerified: true, passwordHash },
     create: {
-      email: "admin@fxprimeacademy.com",
+      email: "admin@phynixeducation.com",
       passwordHash,
       role: "ADMIN",
       isVerified: true,
@@ -47,17 +47,17 @@ export async function seedUsers(prisma: PrismaClient, passwordHash: string) {
   }
 
   const adminWithInstructor = await prisma.user.findUniqueOrThrow({
-    where: { email: "admin@fxprimeacademy.com" },
+    where: { email: "admin@phynixeducation.com" },
     include: { instructor: true },
   })
 
   await prisma.mentor.deleteMany({ where: { userId: adminWithInstructor.id } })
 
   const instructorUser = await prisma.user.upsert({
-    where: { email: "instructor@fxprimeacademy.com" },
+    where: { email: "instructor@phynixeducation.com" },
     update: { role: "INSTRUCTOR", isVerified: true, passwordHash },
     create: {
-      email: "instructor@fxprimeacademy.com",
+      email: "instructor@phynixeducation.com",
       passwordHash,
       role: "INSTRUCTOR",
       isVerified: true,
@@ -86,7 +86,7 @@ export async function seedUsers(prisma: PrismaClient, passwordHash: string) {
   }
 
   const instructorWithProfile = await prisma.user.findUniqueOrThrow({
-    where: { email: "instructor@fxprimeacademy.com" },
+    where: { email: "instructor@phynixeducation.com" },
     include: { instructor: true },
   })
 
@@ -98,7 +98,7 @@ export async function seedUsers(prisma: PrismaClient, passwordHash: string) {
   }
 
   const supportUser = await upsertStudentUser(prisma, {
-    email: "support@fxprimeacademy.com",
+    email: "support@phynixeducation.com",
     passwordHash,
     role: "STUDENT",
     firstName: "Support",
@@ -140,7 +140,7 @@ export async function seedUsers(prisma: PrismaClient, passwordHash: string) {
     { email: "adnan@example.com", uniqueStudentId: "FXP-2026-00001" },
     { email: "rashed@example.com", uniqueStudentId: "FXP-2026-00002" },
     { email: "student@fxprime.test", uniqueStudentId: "FXP-2026-00003" },
-    { email: "support@fxprimeacademy.com", uniqueStudentId: "FXP-2026-00005" },
+    { email: "support@phynixeducation.com", uniqueStudentId: "FXP-2026-00005" },
   ]
 
   for (const { email, uniqueStudentId } of idAssignments) {
@@ -177,7 +177,7 @@ export async function seedUsers(prisma: PrismaClient, passwordHash: string) {
     include: { student: true },
   })
   const supportFinal = await prisma.user.findUniqueOrThrow({
-    where: { email: "support@fxprimeacademy.com" },
+    where: { email: "support@phynixeducation.com" },
     include: { student: true },
   })
 

@@ -49,7 +49,7 @@ bun run --cwd packages/types build
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | `admin@fxprimeacademy.com` | `password123` |
+| Admin | `admin@phynixeducation.com` | `password123` |
 
 ## Testing
 

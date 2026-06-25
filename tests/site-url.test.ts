@@ -7,8 +7,8 @@ import {
 
 describe("site-url", () => {
   test("getCertificateVerifyUrl encodes cert code", () => {
-    const url = getCertificateVerifyUrl("CERT-FXP-2026-00002", "https://fxprimeacademy.com")
-    expect(url).toBe("https://fxprimeacademy.com/verify/CERT-FXP-2026-00002")
+    const url = getCertificateVerifyUrl("CERT-FXP-2026-00002", "https://phynixeducation.com")
+    expect(url).toBe("https://phynixeducation.com/verify/CERT-FXP-2026-00002")
   })
 
   test("isAllowedPublicOrigin accepts localhost", () => {

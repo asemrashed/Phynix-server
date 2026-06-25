@@ -9,14 +9,26 @@ interface SendEmailOptions {
 }
 
 export async function sendEmail({ to, subject, html }: SendEmailOptions): Promise<boolean> {
-  const from = process.env.EMAIL_FROM || "FX Prime Academy <noreply@fxprimeacademy.com>"
+  const from = process.env.EMAIL_FROM || "Phynix Education <noreply@phynixeducation.com>"
+  const normalizedSubject = subject.replace(/FX Prime Academy/gi, "Phynix Education")
+  const normalizedHtml = html.replace(/FX Prime Academy/gi, "Phynix Education")
   const provider = (process.env.EMAIL_PROVIDER || "").toLowerCase()
 
   if (provider === "gmail" || process.env.SMTP_HOST || process.env.SMTP_USER) {
-    return sendEmailViaSmtp({ to, subject, html, from })
+    return sendEmailViaSmtp({
+      to,
+      subject: normalizedSubject,
+      html: normalizedHtml,
+      from,
+    })
   }
 
-  return sendEmailViaResend({ to, subject, html, from })
+  return sendEmailViaResend({
+    to,
+    subject: normalizedSubject,
+    html: normalizedHtml,
+    from,
+  })
 }
 
 async function sendEmailViaResend({

@@ -46,7 +46,7 @@ export function createApp() {
     })
   )
   app.use("/uploads", (req, res, next) => {
-    // Allow fxprimeacademy.com to embed thumbnails/avatars from api.fxprimeacademy.com
+    // Allow phynixeducation.com to embed thumbnails/avatars from api.phynixeducation.com
     res.setHeader("Cross-Origin-Resource-Policy", "cross-origin")
     if (req.path.startsWith("/videos") || req.path.startsWith("/videos/")) {
       return res.status(403).json({ success: false, error: "Forbidden" })
