@@ -147,7 +147,7 @@ export interface DeviceLimitError {
 export type CourseLevel = "BEGINNER" | "INTERMEDIATE" | "ADVANCED"
 export type CourseStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED"
 export type LessonType = "VIDEO" | "TEXT" | "QUIZ"
-export type VideoProvider = "VIMEO" | "YOUTUBE" | "SELF_HOSTED"
+export type VideoProvider = "YOUTUBE" | "SELF_HOSTED"
 
 export interface CourseListItem {
   id: string
@@ -732,7 +732,6 @@ export interface AdminLessonItem {
   type: LessonType
   videoProvider: VideoProvider
   videoRef: string | null
-  vimeoId: string | null
   content: string | null
   duration: number
   order: number

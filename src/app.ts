@@ -30,7 +30,11 @@ export function createApp() {
           callback(null, origin ?? allowedOrigins[0])
           return
         }
-        callback(new Error("Not allowed by CORS"))
+        // Unknown origin (e.g. payment-gateway redirect callbacks like
+        // SSLCommerz): don't throw — that would surface as a 500
+        // INTERNAL_ERROR on /sslcommerz/* callbacks. Just omit CORS
+        // headers; these are top-level navigations that don't need them.
+        callback(null, false)
       },
       credentials: true,
     })

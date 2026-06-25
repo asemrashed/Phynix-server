@@ -1,7 +1,7 @@
 import { Router } from "express"
 import * as paymentController from "../controllers/payment.controller"
 import * as manualPaymentController from "../controllers/manual-payment.controller"
-import { authMiddleware } from "../middlewares/auth.middleware"
+import { authMiddleware, requireRole } from "../middlewares/auth.middleware"
 import { touchDeviceSession } from "../middlewares/device.middleware"
 import { requireEmailVerified } from "../middlewares/email-verification.middleware"
 import { blockInProduction } from "../middlewares/production-guard.middleware"
@@ -16,6 +16,7 @@ router.post(
   "/create-session",
   paymentLimiter,
   authMiddleware,
+  requireRole("STUDENT"),
   touchDeviceSession,
   requireEmailVerified,
   paymentController.createSession
@@ -70,9 +71,10 @@ router.post(
 )
 router.get("/sslcommerz/init/:paymentId", paymentController.sslcommerzInit)
 router.post("/sslcommerz/ipn", webhookLimiter, paymentController.sslcommerzIPN)
-router.get("/sslcommerz/success", paymentController.sslcommerzSuccess)
-router.get("/sslcommerz/fail", paymentController.sslcommerzFail)
-router.get("/sslcommerz/cancel", paymentController.sslcommerzCancel)
+// SSLCommerz posts the redirect callbacks (and supports GET), so accept both.
+router.all("/sslcommerz/success", paymentController.sslcommerzSuccess)
+router.all("/sslcommerz/fail", paymentController.sslcommerzFail)
+router.all("/sslcommerz/cancel", paymentController.sslcommerzCancel)
 router.post(
   "/simulate/:paymentId",
   blockInProduction,

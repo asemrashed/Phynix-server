@@ -231,13 +231,24 @@ export async function sslcommerzIPN(req: Request, res: Response) {
   }
 }
 
+function collectSSLCommerzParams(req: Request): Record<string, string> {
+  const params: Record<string, string> = {}
+  const sources: Array<Record<string, unknown>> = [
+    (req.body as Record<string, unknown>) || {},
+    req.query as Record<string, unknown>,
+  ]
+  for (const source of sources) {
+    for (const [key, value] of Object.entries(source)) {
+      if (value === undefined || value === null) continue
+      params[key] = Array.isArray(value) ? String(value[0]) : String(value)
+    }
+  }
+  return params
+}
+
 export async function sslcommerzSuccess(req: Request, res: Response) {
   try {
-    const query: Record<string, string> = {}
-    for (const [key, value] of Object.entries(req.query)) {
-      if (value === undefined) continue
-      query[key] = Array.isArray(value) ? String(value[0]) : String(value)
-    }
+    const query = collectSSLCommerzParams(req)
 
     const result = await handleSSLCommerzSuccessRedirect(query)
     let redirectUrl = `${frontendUrl()}/payment/success`

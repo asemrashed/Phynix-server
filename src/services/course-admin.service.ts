@@ -13,7 +13,7 @@ import type {
 import { prisma } from "../lib/prisma"
 import { ensureInstructorProfiles } from "./role-profile.service"
 import { listCourseReviews } from "./review.service"
-import { parseVimeoId, parseYoutubeId } from "../lib/video-source"
+import { parseYoutubeId } from "../lib/video-source"
 import { parseCourseFaqs } from "../lib/course-marketing"
 import { getCoursePublishIssues } from "../lib/course-publish-validation"
 
@@ -58,24 +58,15 @@ async function recomputeCourseDuration(courseId: string) {
 function normalizeVideoInput(data: {
   videoProvider?: VideoProvider
   videoRef?: string | null
-  vimeoId?: string | null
-}): { videoProvider: VideoProvider; videoRef: string | null; vimeoId: string | null } {
-  const provider = data.videoProvider ?? "VIMEO"
+}): { videoProvider: VideoProvider; videoRef: string | null } {
+  const provider = data.videoProvider ?? "YOUTUBE"
   let videoRef = data.videoRef?.trim() || null
-  let vimeoId = data.vimeoId?.trim() || null
 
-  if (provider === "VIMEO") {
-    const parsed = videoRef ? parseVimeoId(videoRef) : vimeoId ? parseVimeoId(vimeoId) : null
-    videoRef = parsed
-    vimeoId = parsed
-  } else if (provider === "YOUTUBE") {
+  if (provider === "YOUTUBE") {
     videoRef = videoRef ? parseYoutubeId(videoRef) : null
-    vimeoId = null
-  } else {
-    vimeoId = null
   }
 
-  return { videoProvider: provider, videoRef, vimeoId }
+  return { videoProvider: provider, videoRef }
 }
 
 function mapLesson(lesson: {
@@ -84,7 +75,6 @@ function mapLesson(lesson: {
   type: string
   videoProvider: string
   videoRef: string | null
-  vimeoId: string | null
   content: string | null
   duration: number
   order: number
@@ -94,9 +84,8 @@ function mapLesson(lesson: {
     id: lesson.id,
     title: lesson.title,
     type: lesson.type as LessonType,
-    videoProvider: (lesson.videoProvider as VideoProvider) || "VIMEO",
+    videoProvider: (lesson.videoProvider as VideoProvider) || "YOUTUBE",
     videoRef: lesson.videoRef,
-    vimeoId: lesson.vimeoId,
     content: lesson.content,
     duration: lesson.duration,
     order: lesson.order,
@@ -114,7 +103,6 @@ function mapSection(section: {
     type: string
     videoProvider: string
     videoRef: string | null
-    vimeoId: string | null
     content: string | null
     duration: number
     order: number
@@ -479,7 +467,6 @@ export async function createLesson(
     type: LessonType
     videoProvider?: VideoProvider
     videoRef?: string
-    vimeoId?: string
     content?: string
     duration?: number
     isFree?: boolean
@@ -498,7 +485,7 @@ export async function createLesson(
   const video =
     data.type === "VIDEO"
       ? normalizeVideoInput(data)
-      : { videoProvider: "VIMEO" as VideoProvider, videoRef: null, vimeoId: null }
+      : { videoProvider: "YOUTUBE" as VideoProvider, videoRef: null }
 
   const lesson = await prisma.lesson.create({
     data: {
@@ -507,7 +494,6 @@ export async function createLesson(
       type: data.type,
       videoProvider: video.videoProvider,
       videoRef: video.videoRef,
-      vimeoId: video.vimeoId,
       content: data.type !== "VIDEO" ? data.content : data.content ?? null,
       duration: data.duration ?? 0,
       order: (maxOrder._max.order ?? 0) + 1,
@@ -526,7 +512,6 @@ export async function updateLesson(
     type?: LessonType
     videoProvider?: VideoProvider
     videoRef?: string | null
-    vimeoId?: string | null
     content?: string | null
     duration?: number
     isFree?: boolean
@@ -546,9 +531,8 @@ export async function updateLesson(
       ? normalizeVideoInput({
           videoProvider: data.videoProvider ?? (lesson.videoProvider as VideoProvider),
           videoRef: data.videoRef ?? lesson.videoRef,
-          vimeoId: data.vimeoId ?? lesson.vimeoId,
         })
-      : { videoProvider: "VIMEO" as VideoProvider, videoRef: null, vimeoId: null }
+      : { videoProvider: "YOUTUBE" as VideoProvider, videoRef: null }
 
   const updated = await prisma.lesson.update({
     where: { id: lessonId },
@@ -557,7 +541,6 @@ export async function updateLesson(
       type,
       videoProvider: video.videoProvider,
       videoRef: video.videoRef,
-      vimeoId: video.vimeoId,
       content: type !== "VIDEO" ? (data.content ?? lesson.content) : null,
       duration: data.duration,
       isFree: data.isFree,

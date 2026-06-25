@@ -80,7 +80,6 @@ type SeedVideoLesson = {
   duration: number
   order: number
   isFree?: boolean
-  vimeoId?: string
   youtubeId?: string
 }
 
@@ -106,20 +105,11 @@ type SeedLesson = SeedVideoLesson | SeedTextLesson | SeedQuizLesson
 
 function mapSeedLesson(lesson: SeedLesson) {
   if (lesson.type === "VIDEO" && "youtubeId" in lesson && lesson.youtubeId) {
-    const { youtubeId, vimeoId: _vimeoId, ...rest } = lesson
+    const { youtubeId, ...rest } = lesson
     return {
       ...rest,
       videoProvider: "YOUTUBE" as const,
       videoRef: youtubeId,
-    }
-  }
-
-  if (lesson.type === "VIDEO" && "vimeoId" in lesson && lesson.vimeoId) {
-    const { vimeoId, ...rest } = lesson
-    return {
-      ...rest,
-      videoProvider: "VIMEO" as const,
-      videoRef: vimeoId,
     }
   }
 
@@ -154,18 +144,18 @@ export async function seedContent(prisma: PrismaClient, users: SeedUsers) {
           title: "Market Structure Fundamentals",
           order: 1,
           lessons: [
-            { title: "Introduction to Institutional Trading", type: "VIDEO" as const, duration: 1200, order: 1, isFree: true, vimeoId: "76979871" },
-            { title: "Understanding Market Structure", type: "VIDEO" as const, duration: 1800, order: 2, vimeoId: "76979871" },
-            { title: "Break of Structure (BOS)", type: "VIDEO" as const, duration: 1500, order: 3, vimeoId: "76979871" },
+            { title: "Introduction to Institutional Trading", type: "VIDEO" as const, duration: 1200, order: 1, isFree: true, youtubeId: "dQw4w9WgXcQ" },
+            { title: "Understanding Market Structure", type: "VIDEO" as const, duration: 1800, order: 2, youtubeId: "dQw4w9WgXcQ" },
+            { title: "Break of Structure (BOS)", type: "VIDEO" as const, duration: 1500, order: 3, youtubeId: "dQw4w9WgXcQ" },
           ],
         },
         {
           title: "SMC & ICT Concepts",
           order: 2,
           lessons: [
-            { title: "Smart Money Concepts Overview", type: "VIDEO" as const, duration: 2100, order: 1, vimeoId: "76979871" },
-            { title: "Fair Value Gaps (FVG)", type: "VIDEO" as const, duration: 1800, order: 2, vimeoId: "76979871" },
-            { title: "Order Blocks & Liquidity Sweeps", type: "VIDEO" as const, duration: 2400, order: 3, vimeoId: "76979871" },
+            { title: "Smart Money Concepts Overview", type: "VIDEO" as const, duration: 2100, order: 1, youtubeId: "dQw4w9WgXcQ" },
+            { title: "Fair Value Gaps (FVG)", type: "VIDEO" as const, duration: 1800, order: 2, youtubeId: "dQw4w9WgXcQ" },
+            { title: "Order Blocks & Liquidity Sweeps", type: "VIDEO" as const, duration: 2400, order: 3, youtubeId: "dQw4w9WgXcQ" },
           ],
         },
       ],
@@ -200,18 +190,18 @@ export async function seedContent(prisma: PrismaClient, users: SeedUsers) {
           title: "Forex Market Basics",
           order: 1,
           lessons: [
-            { title: "What is Forex Trading?", type: "VIDEO" as const, duration: 900, order: 1, isFree: true, vimeoId: "76979871" },
-            { title: "Currency Pairs Explained", type: "VIDEO" as const, duration: 1200, order: 2, vimeoId: "76979871" },
-            { title: "How to Choose a Broker", type: "VIDEO" as const, duration: 1500, order: 3, vimeoId: "76979871" },
+            { title: "What is Forex Trading?", type: "VIDEO" as const, duration: 900, order: 1, isFree: true, youtubeId: "dQw4w9WgXcQ" },
+            { title: "Currency Pairs Explained", type: "VIDEO" as const, duration: 1200, order: 2, youtubeId: "dQw4w9WgXcQ" },
+            { title: "How to Choose a Broker", type: "VIDEO" as const, duration: 1500, order: 3, youtubeId: "dQw4w9WgXcQ" },
           ],
         },
         {
           title: "Technical Analysis",
           order: 2,
           lessons: [
-            { title: "Reading Candlestick Charts", type: "VIDEO" as const, duration: 1800, order: 1, vimeoId: "76979871" },
-            { title: "Support & Resistance", type: "VIDEO" as const, duration: 1500, order: 2, vimeoId: "76979871" },
-            { title: "Trend Analysis", type: "VIDEO" as const, duration: 1200, order: 3, vimeoId: "76979871" },
+            { title: "Reading Candlestick Charts", type: "VIDEO" as const, duration: 1800, order: 1, youtubeId: "dQw4w9WgXcQ" },
+            { title: "Support & Resistance", type: "VIDEO" as const, duration: 1500, order: 2, youtubeId: "dQw4w9WgXcQ" },
+            { title: "Trend Analysis", type: "VIDEO" as const, duration: 1200, order: 3, youtubeId: "dQw4w9WgXcQ" },
           ],
         },
       ],
@@ -234,8 +224,8 @@ export async function seedContent(prisma: PrismaClient, users: SeedUsers) {
           title: "Forex Basics",
           order: 1,
           lessons: [
-            { title: "What is the Forex Market?", type: "VIDEO" as const, duration: 900, order: 1, isFree: true, vimeoId: "76979871" },
-            { title: "Understanding Currency Pairs", type: "VIDEO" as const, duration: 1200, order: 2, isFree: true, vimeoId: "76979871" },
+            { title: "What is the Forex Market?", type: "VIDEO" as const, duration: 900, order: 1, isFree: true, youtubeId: "dQw4w9WgXcQ" },
+            { title: "Understanding Currency Pairs", type: "VIDEO" as const, duration: 1200, order: 2, isFree: true, youtubeId: "dQw4w9WgXcQ" },
             {
               title: "Forex Basics — Text Guide",
               type: "TEXT" as const,
@@ -251,7 +241,7 @@ export async function seedContent(prisma: PrismaClient, users: SeedUsers) {
           title: "Charts & Technical Analysis",
           order: 2,
           lessons: [
-            { title: "Reading Candlestick Charts", type: "VIDEO" as const, duration: 1500, order: 1, isFree: false, vimeoId: "76979871" },
+            { title: "Reading Candlestick Charts", type: "VIDEO" as const, duration: 1500, order: 1, isFree: false, youtubeId: "dQw4w9WgXcQ" },
             {
               title: "Support & Resistance — Text Guide",
               type: "TEXT" as const,

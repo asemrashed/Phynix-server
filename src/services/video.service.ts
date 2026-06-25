@@ -6,7 +6,6 @@ import {
   buildYoutubeEmbedUrl,
   resolveLessonVideo,
 } from "../lib/video-source"
-import { buildVimeoEmbedUrl } from "./vimeo.service"
 import { assertInstallmentCourseAccess } from "./installment-access.service"
 
 const TOKEN_TTL_SECONDS = 4 * 60 * 60
@@ -27,7 +26,6 @@ type VideoAccessContext = {
     duration: number
     isFree: boolean
     type: string
-    vimeoId: string | null
     videoRef: string | null
     videoProvider: string | null
   }
@@ -109,13 +107,6 @@ async function buildVideoTokenResponse(
     duration: lesson.duration,
     sessionToken,
     isCompleted: lessonProgress?.isCompleted ?? false,
-  }
-
-  if (provider === "VIMEO") {
-    const embedUrl = await buildVimeoEmbedUrl(ref, {
-      startSeconds: watchPosition > 0 ? watchPosition : undefined,
-    })
-    return { ...base, embedUrl }
   }
 
   if (provider === "YOUTUBE") {

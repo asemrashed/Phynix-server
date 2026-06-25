@@ -133,7 +133,6 @@ enum LessonType {
 }
 
 enum VideoProvider {
-  VIMEO
   YOUTUBE
   SELF_HOSTED
 }
@@ -207,9 +206,8 @@ model Lesson {
   section   Section    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   title     String
   type          LessonType     @default(VIDEO)
-  videoProvider VideoProvider  @default(VIMEO)
+  videoProvider VideoProvider  @default(YOUTUBE)
   videoRef      String?
-  vimeoId       String?
   content       String?
   duration  Int        @default(0)
   order     Int

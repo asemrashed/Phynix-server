@@ -245,7 +245,6 @@ export async function uploadCourseVideo(req: Request, res: Response, next: NextF
     const updated = await updateLesson(lessonId, {
       videoProvider: "SELF_HOSTED",
       videoRef,
-      vimeoId: null,
     })
 
     return sendSuccess(res, {

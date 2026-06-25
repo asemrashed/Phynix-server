@@ -1,7 +1,7 @@
 import { Router } from "express"
 import * as courseController from "../controllers/course.controller"
 import * as videoController from "../controllers/video.controller"
-import { authMiddleware, optionalAuth } from "../middlewares/auth.middleware"
+import { authMiddleware, optionalAuth, requireRole } from "../middlewares/auth.middleware"
 import { touchDeviceSession } from "../middlewares/device.middleware"
 import { requireEmailVerified } from "../middlewares/email-verification.middleware"
 
@@ -24,6 +24,7 @@ router.get("/:slug", optionalAuth, courseController.getCourse)
 router.post(
   "/:courseId/enroll",
   authMiddleware,
+  requireRole("STUDENT"),
   touchDeviceSession,
   requireEmailVerified,
   courseController.enroll

@@ -17,27 +17,14 @@ export function parseYoutubeId(input: string): string | null {
   return null
 }
 
-export function parseVimeoId(input: string): string | null {
-  const trimmed = input.trim()
-  if (/^\d+$/.test(trimmed)) return trimmed
-
-  const match = trimmed.match(/vimeo\.com\/(?:video\/)?(\d+)/)
-  return match?.[1] ?? null
-}
-
 export function resolveLessonVideo(lesson: {
   videoProvider: string | null
   videoRef: string | null
-  vimeoId: string | null
 }): { provider: VideoProvider; ref: string | null } {
-  const provider = (lesson.videoProvider as VideoProvider | null) || "VIMEO"
+  const provider = (lesson.videoProvider as VideoProvider | null) || "YOUTUBE"
 
   if (lesson.videoRef?.trim()) {
     return { provider, ref: lesson.videoRef.trim() }
-  }
-
-  if (lesson.vimeoId?.trim()) {
-    return { provider: "VIMEO", ref: lesson.vimeoId.trim() }
   }
 
   return { provider, ref: null }

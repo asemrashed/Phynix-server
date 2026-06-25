@@ -6,7 +6,6 @@ const baseLesson = {
   type: "VIDEO",
   videoProvider: "YOUTUBE",
   videoRef: "dQw4w9WgXcQ",
-  vimeoId: null,
   content: null,
   duration: 600,
   isFree: false,
@@ -43,7 +42,7 @@ describe("getCoursePublishIssues", () => {
       sections: [
         {
           title: "Section 1",
-          lessons: [{ ...baseLesson, videoRef: null, vimeoId: null }],
+          lessons: [{ ...baseLesson, videoRef: null }],
         },
       ],
     })

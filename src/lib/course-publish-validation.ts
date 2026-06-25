@@ -17,7 +17,6 @@ type PublishLesson = {
   type: string
   videoProvider: string | null
   videoRef: string | null
-  vimeoId: string | null
   content: string | null
   duration: number
   isFree: boolean

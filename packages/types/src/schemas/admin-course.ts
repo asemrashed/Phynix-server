@@ -58,14 +58,13 @@ export const updateCourseSchema = createCourseSchema.partial().extend({
   refundDays: z.number().int().min(0).max(90).nullable().optional(),
 })
 
-export const videoProviderSchema = z.enum(["VIMEO", "YOUTUBE", "SELF_HOSTED"])
+export const videoProviderSchema = z.enum(["YOUTUBE", "SELF_HOSTED"])
 
 export const createLessonSchema = z.object({
   title: z.string().trim().min(1, "Lesson title is required"),
   type: lessonTypeSchema,
   videoProvider: videoProviderSchema.optional(),
   videoRef: z.string().optional(),
-  vimeoId: z.string().optional(),
   content: z.string().optional(),
   duration: z.number().int().min(0).optional(),
   isFree: z.boolean().optional(),
@@ -73,7 +72,6 @@ export const createLessonSchema = z.object({
 
 export const updateLessonSchema = createLessonSchema.partial().extend({
   videoRef: z.string().nullable().optional(),
-  vimeoId: z.string().nullable().optional(),
   content: z.string().nullable().optional(),
 })
 

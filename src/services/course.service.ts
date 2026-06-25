@@ -436,8 +436,8 @@ export async function getStudentLesson(
     )
   } else {
     content = {
-      provider: (lesson.videoProvider as VideoProvider) || "VIMEO",
-      videoRef: lesson.videoRef ?? lesson.vimeoId,
+      provider: (lesson.videoProvider as VideoProvider) || "YOUTUBE",
+      videoRef: lesson.videoRef,
     }
   }
 

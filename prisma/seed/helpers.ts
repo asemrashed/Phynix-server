@@ -192,7 +192,7 @@ type SyncLesson = {
   order: number
   isFree?: boolean
   content?: string
-  videoProvider?: "YOUTUBE" | "VIMEO"
+  videoProvider?: "YOUTUBE" | "SELF_HOSTED"
   videoRef?: string
 }
 
@@ -228,7 +228,7 @@ export async function syncCourseSections(
         duration: lessonData.duration,
         isFree: lessonData.isFree ?? false,
         content: lessonData.content ?? null,
-        videoProvider: lessonData.videoProvider ?? "VIMEO",
+        videoProvider: lessonData.videoProvider ?? "YOUTUBE",
         videoRef: lessonData.videoRef ?? null,
       }
 
