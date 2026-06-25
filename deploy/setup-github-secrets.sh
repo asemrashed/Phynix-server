@@ -6,8 +6,8 @@
 #   bash deploy/setup-github-secrets.sh
 set -euo pipefail
 
-BACKEND_REPO="${BACKEND_REPO:-Adnan4141/fx-prime-backend}"
-FRONTEND_REPO="${FRONTEND_REPO:-Adnan4141/fx-prime-frontend}"
+BACKEND_REPO="${BACKEND_REPO:-asemrashed/Phynix-server}"
+FRONTEND_REPO="${FRONTEND_REPO:-asemrashed/Phynix-LMS}"
 DOCKERHUB_USERNAME="${DOCKERHUB_USERNAME:-adnanh7}"
 VPS_HOST="${VPS_HOST:-62.72.56.160}"
 VPS_USER="${VPS_USER:-root}"

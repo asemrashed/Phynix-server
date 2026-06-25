@@ -1,8 +1,8 @@
 # FX Prime Academy — Backend
 
-Express API + PostgreSQL (Prisma) for [FX Prime Academy](https://github.com/Adnan4141/fx-prime-backend).
+Express API + PostgreSQL (Prisma) for [FX Prime Academy](https://github.com/asemrashed/Phynix-server).
 
-This repo is half of a **polyrepo**: the Next.js app lives in [fx-prime-frontend](https://github.com/Adnan4141/fx-prime-frontend).
+This repo is half of a **polyrepo**: the Next.js app lives in [Phynix-LMS](https://github.com/asemrashed/Phynix-LMS).
 
 ## Local setup (polyrepo)
 
@@ -11,8 +11,8 @@ Clone both repos as **siblings** under one parent folder:
 ```bash
 mkdir finance-academy && cd finance-academy
 
-git clone git@github.com:Adnan4141/fx-prime-backend.git backend
-git clone git@github.com:Adnan4141/fx-prime-frontend.git frontend
+git clone git@github.com:asemrashed/Phynix-server.git backend
+git clone git@github.com:asemrashed/Phynix-LMS.git frontend
 ```
 
 Expected layout:
@@ -68,5 +68,5 @@ bun run build
 
 ## GitHub
 
-- **Repo:** [Adnan4141/fx-prime-backend](https://github.com/Adnan4141/fx-prime-backend)
+- **Repo:** [asemrashed/Phynix-server](https://github.com/asemrashed/Phynix-server)
 - **CI:** `.github/workflows/ci.yml` — tests + deploy orchestration on `main`

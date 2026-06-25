@@ -1,3 +1,5 @@
+import nodemailer from "nodemailer"
+
 const RESEND_API = "https://api.resend.com/emails"
 
 interface SendEmailOptions {
@@ -7,8 +9,23 @@ interface SendEmailOptions {
 }
 
 export async function sendEmail({ to, subject, html }: SendEmailOptions): Promise<boolean> {
-  const apiKey = process.env.RESEND_API_KEY
   const from = process.env.EMAIL_FROM || "FX Prime Academy <noreply@fxprimeacademy.com>"
+  const provider = (process.env.EMAIL_PROVIDER || "").toLowerCase()
+
+  if (provider === "gmail" || process.env.SMTP_HOST || process.env.SMTP_USER) {
+    return sendEmailViaSmtp({ to, subject, html, from })
+  }
+
+  return sendEmailViaResend({ to, subject, html, from })
+}
+
+async function sendEmailViaResend({
+  to,
+  subject,
+  html,
+  from,
+}: SendEmailOptions & { from: string }): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY
 
   if (!apiKey) {
     console.log(`[Email] To: ${to}`)
@@ -33,6 +50,39 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions): Promis
     return true
   } catch (err) {
     console.error("[Email] Failed to send:", err)
+    return false
+  }
+}
+
+async function sendEmailViaSmtp({
+  to,
+  subject,
+  html,
+  from,
+}: SendEmailOptions & { from: string }): Promise<boolean> {
+  const host = process.env.SMTP_HOST || "smtp.gmail.com"
+  const port = Number(process.env.SMTP_PORT || 465)
+  const secure = (process.env.SMTP_SECURE || String(port === 465)).toLowerCase() === "true"
+  const user = process.env.SMTP_USER
+  const pass = process.env.SMTP_PASS
+
+  if (!user || !pass) {
+    console.error("[Email] SMTP_USER/SMTP_PASS are required for SMTP provider")
+    return false
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: { user, pass },
+    })
+
+    await transporter.sendMail({ from, to, subject, html })
+    return true
+  } catch (err) {
+    console.error("[Email] SMTP send failed:", err)
     return false
   }
 }
