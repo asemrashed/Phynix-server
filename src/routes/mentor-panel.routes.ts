@@ -5,7 +5,7 @@ import { touchDeviceSession } from "../middlewares/device.middleware"
 
 const router = Router()
 
-router.use(authMiddleware, requireRole("MENTOR"), touchDeviceSession)
+router.use(authMiddleware, requireRole("INSTRUCTOR"), touchDeviceSession)
 
 router.get("/stats", ctrl.getStats)
 router.get("/profile", ctrl.getProfile)
