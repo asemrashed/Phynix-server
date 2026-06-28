@@ -9,7 +9,7 @@ const router = Router()
 
 router.get("/", optionalAuth, courseController.getCourses)
 router.get("/enrollments/me", authMiddleware, touchDeviceSession, courseController.getMyEnrollments)
-router.get("/:courseId/reviews", courseController.getCourseReviews)
+router.get("/:courseId/reviews", optionalAuth, courseController.getCourseReviews)
 router.post(
   "/:courseId/reviews",
   authMiddleware,

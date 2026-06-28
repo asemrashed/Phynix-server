@@ -199,11 +199,24 @@ export interface CourseReviewItem {
   studentName: string
   createdAt: string
   isOwn?: boolean
+  isPublished?: boolean
 }
 
 export interface HomepageCourseReviewItem extends CourseReviewItem {
   studentAvatar: string | null
   courseName: string
+}
+
+export interface AdminCourseReviewItem {
+  id: string
+  rating: number
+  review: string | null
+  studentName: string
+  studentAvatar: string | null
+  courseId: string
+  courseName: string
+  isPublished: boolean
+  createdAt: string
 }
 
 export interface SubmitCourseReviewRequest {

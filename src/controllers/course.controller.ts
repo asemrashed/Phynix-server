@@ -203,7 +203,17 @@ export async function updateProgress(req: Request, res: Response, next: NextFunc
 export async function getCourseReviews(req: Request, res: Response, next: NextFunction) {
   try {
     const courseId = param(req.params.courseId)
-    const reviews = await listCourseReviews(courseId)
+    let viewerStudentId: string | undefined
+
+    if (req.user?.userId) {
+      const student = await prisma.student.findUnique({
+        where: { userId: req.user.userId },
+        select: { id: true },
+      })
+      viewerStudentId = student?.id
+    }
+
+    const reviews = await listCourseReviews(courseId, 20, viewerStudentId)
     return sendSuccess(res, reviews)
   } catch (err) {
     next(err)

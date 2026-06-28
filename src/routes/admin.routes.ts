@@ -7,6 +7,7 @@ import * as userAdminController from "../controllers/user-admin.controller"
 import * as certificateAdminController from "../controllers/certificate-admin.controller"
 import * as communityAdminController from "../controllers/community-admin.controller"
 import * as testimonialController from "../controllers/testimonial.controller"
+import * as reviewController from "../controllers/review.controller"
 import * as paymentSettingsController from "../controllers/payment-settings.controller"
 import * as manualPaymentController from "../controllers/manual-payment.controller"
 import * as contactController from "../controllers/contact.controller"
@@ -154,6 +155,9 @@ router.post("/testimonials", testimonialController.postTestimonial)
 router.get("/testimonials/:testimonialId", testimonialController.getAdminTestimonialDetail)
 router.patch("/testimonials/:testimonialId", testimonialController.patchTestimonial)
 router.delete("/testimonials/:testimonialId", testimonialController.removeTestimonial)
+router.get("/reviews", reviewController.getAdminReviews)
+router.patch("/reviews/:reviewId", reviewController.patchAdminReview)
+router.delete("/reviews/:reviewId", reviewController.removeAdminReview)
 router.get("/inquiries", contactController.getAdminInquiries)
 router.get("/inquiries/:inquiryId", contactController.getAdminInquiryDetail)
 router.patch("/inquiries/:inquiryId", contactController.patchAdminInquiry)

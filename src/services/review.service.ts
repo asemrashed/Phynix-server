@@ -1,10 +1,36 @@
 import { prisma } from "../lib/prisma"
+import { paginatedResult, type PaginationParams } from "../lib/pagination"
 
 export const REVIEW_PROGRESS_THRESHOLD = 80
 
 function roundRating(value: number | null | undefined): number {
   if (!value) return 0
   return Math.round(value * 10) / 10
+}
+
+function mapCourseReviewItem(
+  r: {
+    id: string
+    rating: number
+    review: string | null
+    isPublished: boolean
+    createdAt: Date
+    student: { firstName: string; lastName: string }
+  },
+  options?: { maskName?: boolean; isOwn?: boolean }
+) {
+  const fullName = `${r.student.firstName} ${r.student.lastName}`
+  return {
+    id: r.id,
+    rating: r.rating,
+    review: r.review,
+    studentName: options?.maskName
+      ? `${r.student.firstName} ${r.student.lastName.charAt(0)}.`
+      : fullName,
+    createdAt: r.createdAt.toISOString(),
+    isPublished: r.isPublished,
+    ...(options?.isOwn !== undefined ? { isOwn: options.isOwn } : {}),
+  }
 }
 
 export function canReviewCourse(
@@ -18,7 +44,7 @@ export function canReviewCourse(
 
 export async function getCourseRatingStats(courseId: string) {
   const agg = await prisma.courseReview.aggregate({
-    where: { courseId },
+    where: { courseId, isPublished: true },
     _avg: { rating: true },
     _count: { rating: true },
   })
@@ -34,7 +60,7 @@ export async function getBatchCourseRatingStats(courseIds: string[]) {
 
   const groups = await prisma.courseReview.groupBy({
     by: ["courseId"],
-    where: { courseId: { in: courseIds } },
+    where: { courseId: { in: courseIds }, isPublished: true },
     _avg: { rating: true },
     _count: { rating: true },
   })
@@ -64,18 +90,13 @@ export async function getStudentCourseReview(
   if (!review) return null
 
   return {
-    id: review.id,
-    rating: review.rating,
-    review: review.review,
-    studentName: `${review.student.firstName} ${review.student.lastName}`,
-    createdAt: review.createdAt.toISOString(),
-    isOwn: true,
+    ...mapCourseReviewItem(review, { isOwn: true }),
   }
 }
 
 export async function listRecentCourseReviews(limit = 6) {
   const reviews = await prisma.courseReview.findMany({
-    where: { review: { not: null } },
+    where: { isPublished: true, review: { not: null } },
     include: {
       student: { select: { firstName: true, lastName: true, avatarUrl: true } },
       course: { select: { title: true } },
@@ -85,19 +106,25 @@ export async function listRecentCourseReviews(limit = 6) {
   })
 
   return reviews.map((r) => ({
-    id: r.id,
-    rating: r.rating,
-    review: r.review,
-    studentName: `${r.student.firstName} ${r.student.lastName.charAt(0)}.`,
+    ...mapCourseReviewItem(r, { maskName: true }),
     studentAvatar: r.student.avatarUrl,
     courseName: r.course.title,
-    createdAt: r.createdAt.toISOString(),
   }))
 }
 
-export async function listCourseReviews(courseId: string, limit = 20) {
+export async function listCourseReviews(
+  courseId: string,
+  limit = 20,
+  viewerStudentId?: string
+) {
   const reviews = await prisma.courseReview.findMany({
-    where: { courseId },
+    where: {
+      courseId,
+      OR: [
+        { isPublished: true },
+        ...(viewerStudentId ? [{ studentId: viewerStudentId }] : []),
+      ],
+    },
     include: {
       student: { select: { firstName: true, lastName: true } },
     },
@@ -105,14 +132,12 @@ export async function listCourseReviews(courseId: string, limit = 20) {
     take: limit,
   })
 
-  return reviews.map((r) => ({
-    id: r.id,
-    rating: r.rating,
-    review: r.review,
-    studentName: `${r.student.firstName} ${r.student.lastName.charAt(0)}.`,
-    createdAt: r.createdAt.toISOString(),
-    isOwn: false,
-  }))
+  return reviews.map((r) =>
+    mapCourseReviewItem(r, {
+      maskName: true,
+      isOwn: viewerStudentId ? r.studentId === viewerStudentId : false,
+    })
+  )
 }
 
 export async function submitCourseReview(
@@ -160,10 +185,12 @@ export async function submitCourseReview(
       courseId,
       rating,
       review: review?.trim() || null,
+      isPublished: false,
     },
     update: {
       rating,
       review: review?.trim() || null,
+      isPublished: false,
     },
     include: {
       student: { select: { firstName: true, lastName: true } },
@@ -173,14 +200,81 @@ export async function submitCourseReview(
   const stats = await getCourseRatingStats(courseId)
 
   return {
-    id: saved.id,
-    rating: saved.rating,
-    review: saved.review,
-    studentName: `${saved.student.firstName} ${saved.student.lastName}`,
-    createdAt: saved.createdAt.toISOString(),
-    isOwn: true,
+    ...mapCourseReviewItem(saved, { isOwn: true }),
     ...stats,
   }
+}
+
+export async function listAdminCourseReviews(pagination: PaginationParams) {
+  const { page, pageSize, skip } = pagination
+
+  const [reviews, total] = await Promise.all([
+    prisma.courseReview.findMany({
+      include: {
+        student: { select: { firstName: true, lastName: true, avatarUrl: true } },
+        course: { select: { id: true, title: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: pageSize,
+    }),
+    prisma.courseReview.count(),
+  ])
+
+  const items = reviews.map((r) => ({
+    id: r.id,
+    rating: r.rating,
+    review: r.review,
+    studentName: `${r.student.firstName} ${r.student.lastName}`,
+    studentAvatar: r.student.avatarUrl,
+    courseId: r.course.id,
+    courseName: r.course.title,
+    isPublished: r.isPublished,
+    createdAt: r.createdAt.toISOString(),
+  }))
+
+  return paginatedResult(items, total, page, pageSize)
+}
+
+export async function updateAdminCourseReview(
+  id: string,
+  data: { isPublished?: boolean }
+) {
+  const existing = await prisma.courseReview.findUnique({ where: { id } })
+  if (!existing) {
+    throw Object.assign(new Error("Review not found"), { code: "NOT_FOUND" })
+  }
+
+  const updated = await prisma.courseReview.update({
+    where: { id },
+    data,
+    include: {
+      student: { select: { firstName: true, lastName: true, avatarUrl: true } },
+      course: { select: { id: true, title: true } },
+    },
+  })
+
+  return {
+    id: updated.id,
+    rating: updated.rating,
+    review: updated.review,
+    studentName: `${updated.student.firstName} ${updated.student.lastName}`,
+    studentAvatar: updated.student.avatarUrl,
+    courseId: updated.course.id,
+    courseName: updated.course.title,
+    isPublished: updated.isPublished,
+    createdAt: updated.createdAt.toISOString(),
+  }
+}
+
+export async function deleteAdminCourseReview(id: string) {
+  const existing = await prisma.courseReview.findUnique({ where: { id } })
+  if (!existing) {
+    throw Object.assign(new Error("Review not found"), { code: "NOT_FOUND" })
+  }
+
+  await prisma.courseReview.delete({ where: { id } })
+  return { deleted: true }
 }
 
 export async function recalculateMentorRating(mentorId: string) {
