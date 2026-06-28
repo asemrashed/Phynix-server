@@ -9,6 +9,56 @@ export const courseFaqSchema = z.object({
   answer: z.string().trim().min(1, "Answer is required"),
 })
 
+export const saveCourseDraftSchema = z.object({
+  title: z.string().trim().min(1, "Title is required"),
+  slug: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9-]*$/, "Slug may only contain lowercase letters, numbers, and hyphens")
+    .optional(),
+  description: z.string().optional(),
+  subtitle: z.string().trim().max(300).optional(),
+  badgeLabel: z.string().trim().max(50).optional(),
+  highlights: z
+    .array(z.string().trim().min(1, "Highlight cannot be empty"))
+    .max(12, "Maximum 12 highlights")
+    .optional(),
+  faqs: z.array(courseFaqSchema).max(20, "Maximum 20 FAQs").optional(),
+  discountEndsAt: z.string().datetime().optional(),
+  seatLimit: z.number().int().min(1).optional(),
+  startsAt: z.string().datetime().optional(),
+  classSchedule: z.string().trim().max(100).optional(),
+  deliveryType: z.string().trim().max(50).optional(),
+  refundDays: z.number().int().min(0).max(90).optional(),
+  learningOutcomes: z
+    .array(z.string().trim().min(1, "Outcome cannot be empty"))
+    .max(20, "Maximum 20 learning outcomes")
+    .optional(),
+  thumbnailUrl: z.string().optional(),
+  price: z.number().min(0, "Price cannot be negative").optional(),
+  originalPrice: z.number().min(0).optional(),
+  currency: z.literal("BDT").optional(),
+  level: courseLevelSchema.optional(),
+  language: z.string().trim().min(2, "Language is required").optional(),
+  instructorId: z.string().uuid().optional(),
+  status: z.literal("DRAFT").optional(),
+})
+
+export const updateCourseDraftSchema = saveCourseDraftSchema.partial().extend({
+  status: courseStatusSchema.optional(),
+  isFeatured: z.boolean().optional(),
+  thumbnailUrl: z.string().nullable().optional(),
+  originalPrice: z.number().min(0).nullable().optional(),
+  subtitle: z.string().trim().max(300).nullable().optional(),
+  badgeLabel: z.string().trim().max(50).nullable().optional(),
+  discountEndsAt: z.string().datetime().nullable().optional(),
+  seatLimit: z.number().int().min(1).nullable().optional(),
+  startsAt: z.string().datetime().nullable().optional(),
+  classSchedule: z.string().trim().max(100).nullable().optional(),
+  deliveryType: z.string().trim().max(50).nullable().optional(),
+  refundDays: z.number().int().min(0).max(90).nullable().optional(),
+})
+
 export const createCourseSchema = z.object({
   title: z.string().trim().min(3, "Title must be at least 3 characters"),
   slug: z
@@ -75,6 +125,8 @@ export const updateLessonSchema = createLessonSchema.partial().extend({
   content: z.string().nullable().optional(),
 })
 
+export type SaveCourseDraftInput = z.infer<typeof saveCourseDraftSchema>
+export type UpdateCourseDraftInput = z.infer<typeof updateCourseDraftSchema>
 export type CreateCourseInput = z.infer<typeof createCourseSchema>
 export type UpdateCourseInput = z.infer<typeof updateCourseSchema>
 export type CreateLessonInput = z.infer<typeof createLessonSchema>

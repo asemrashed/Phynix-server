@@ -124,7 +124,7 @@ export async function listInstructors(): Promise<AdminInstructorItem[]> {
     where: {
       user: {
         isActive: true,
-        role: { in: ["INSTRUCTOR", "ADMIN"] },
+        role: { in: ["INSTRUCTOR", "ADMIN", "SUPER_ADMIN"] },
       },
     },
     orderBy: { displayName: "asc" },
@@ -223,6 +223,21 @@ function mapMarketingInput(data: CourseMarketingInput) {
   return mapped
 }
 
+function slugifyTitle(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+}
+
+function resolveCourseSlug(title: string, slug?: string): string {
+  const candidate = (slug?.trim() || slugifyTitle(title)).replace(/^-+|-+$/g, "")
+  if (candidate.length >= 3) return candidate
+  const prefix = candidate.length > 0 ? candidate : "draft"
+  return `${prefix}-${Date.now().toString(36)}`
+}
+
 export async function resolveDefaultInstructorId(): Promise<string> {
   const instructors = await listInstructors()
   if (instructors.length === 0) {
@@ -233,8 +248,8 @@ export async function resolveDefaultInstructorId(): Promise<string> {
 
 export async function createCourse(data: {
   title: string
-  slug: string
-  description: string
+  slug?: string
+  description?: string
   subtitle?: string
   badgeLabel?: string
   highlights?: string[]
@@ -247,14 +262,15 @@ export async function createCourse(data: {
   refundDays?: number
   learningOutcomes?: string[]
   thumbnailUrl?: string
-  price: number
+  price?: number
   originalPrice?: number
   currency?: string
-  level: CourseLevel
-  language: string
+  level?: CourseLevel
+  language?: string
   instructorId?: string
 }) {
-  const existing = await prisma.course.findUnique({ where: { slug: data.slug } })
+  const slug = resolveCourseSlug(data.title, data.slug)
+  const existing = await prisma.course.findUnique({ where: { slug } })
   if (existing) {
     throw Object.assign(new Error("Slug already exists"), { code: "SLUG_EXISTS" })
   }
@@ -267,17 +283,17 @@ export async function createCourse(data: {
 
   const course = await prisma.course.create({
     data: {
-      title: data.title,
-      slug: data.slug,
-      description: data.description,
+      title: data.title.trim(),
+      slug,
+      description: data.description?.trim() ?? "",
       learningOutcomes: data.learningOutcomes ?? [],
       ...mapMarketingInput(data),
       thumbnailUrl: data.thumbnailUrl,
-      price: data.price,
+      price: data.price ?? 0,
       originalPrice: data.originalPrice,
       currency: data.currency || "BDT",
-      level: data.level,
-      language: data.language,
+      level: data.level ?? "BEGINNER",
+      language: data.language ?? "ENGLISH",
       instructorId,
       status: "DRAFT",
     },

@@ -1,10 +1,20 @@
 import type { Role } from "@fxprime/types"
 import { prisma } from "../lib/prisma"
 
+const PLATFORM_INSTRUCTOR_NAME = "Phynix Education"
+
+const INSTRUCTOR_ELIGIBLE_ROLES = ["INSTRUCTOR", "ADMIN", "SUPER_ADMIN"] as const satisfies readonly Role[]
+
+function isInstructorEligibleRole(role: Role): role is (typeof INSTRUCTOR_ELIGIBLE_ROLES)[number] {
+  return (INSTRUCTOR_ELIGIBLE_ROLES as readonly Role[]).includes(role)
+}
+
 function resolveDisplayName(
   email: string,
+  role: Role,
   student?: { firstName: string; lastName: string } | null
 ) {
+  if (role === "ADMIN" || role === "SUPER_ADMIN") return PLATFORM_INSTRUCTOR_NAME
   if (student) return `${student.firstName} ${student.lastName}`.trim()
   return email.split("@")[0]
 }
@@ -14,27 +24,29 @@ export async function provisionRoleProfile(userId: string, role: Role) {
     where: { id: userId },
     include: { student: true },
   })
-  if (!user) return
+  if (!user || !isInstructorEligibleRole(role)) return
 
-  const displayName = resolveDisplayName(user.email, user.student)
+  const displayName = resolveDisplayName(user.email, role, user.student)
 
-  if (role === "INSTRUCTOR") {
-    await prisma.instructor.upsert({
-      where: { userId },
-      create: { userId, displayName },
-      update: {},
-    })
-  }
+  await prisma.instructor.upsert({
+    where: { userId },
+    create: { userId, displayName },
+    update: {},
+  })
 }
 
 export async function ensureInstructorProfiles() {
   const users = await prisma.user.findMany({
-    where: { role: "INSTRUCTOR", isActive: true, instructor: { is: null } },
+    where: {
+      role: { in: [...INSTRUCTOR_ELIGIBLE_ROLES] },
+      isActive: true,
+      instructor: { is: null },
+    },
     include: { student: true },
   })
 
   for (const user of users) {
-    await provisionRoleProfile(user.id, "INSTRUCTOR")
+    await provisionRoleProfile(user.id, user.role as Role)
   }
 }
 

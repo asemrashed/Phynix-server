@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express"
 import { z } from "zod"
 import {
-  createCourseSchema,
   updateCourseSchema,
+  saveCourseDraftSchema,
+  updateCourseDraftSchema,
   createLessonSchema,
   updateLessonSchema,
 } from "@fxprime/types"
@@ -34,7 +35,7 @@ function handleServiceError(err: unknown, res: Response, next: NextFunction) {
   if (code === "NOT_FOUND") {
     return sendError(res, code, (err as Error).message, 404)
   }
-  if (code === "SLUG_EXISTS" || code === "INVALID_ORDER" || code === "INVALID_FILE_TYPE" || code === "FILE_TOO_LARGE" || code === "PUBLISH_BLOCKED") {
+  if (code === "SLUG_EXISTS" || code === "INVALID_ORDER" || code === "INVALID_FILE_TYPE" || code === "FILE_TOO_LARGE" || code === "PUBLISH_BLOCKED" || code === "NO_INSTRUCTOR") {
     return sendError(res, code, (err as Error).message, 400)
   }
   return next(err)
@@ -60,7 +61,7 @@ export async function getCourseDetail(req: Request, res: Response, next: NextFun
 
 export async function postCourse(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = createCourseSchema.parse(req.body)
+    const data = saveCourseDraftSchema.parse(req.body)
     const course = await createCourse(data)
     return sendSuccess(res, course, 201)
   } catch (err) {
@@ -70,7 +71,10 @@ export async function postCourse(req: Request, res: Response, next: NextFunction
 
 export async function patchCourseDetail(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = updateCourseSchema.parse(req.body)
+    const wantsPublish = req.body?.status === "PUBLISHED"
+    const data = wantsPublish
+      ? updateCourseSchema.parse(req.body)
+      : updateCourseDraftSchema.parse(req.body)
     const course = await updateCourse(param(req.params.courseId), data)
     return sendSuccess(res, course)
   } catch (err) {
