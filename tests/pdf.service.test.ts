@@ -1,7 +1,12 @@
 import { describe, expect, test } from "bun:test"
 import fs from "fs"
-import path from "path"
 import { generateCertificatePdf, getCertificateFilePath } from "../src/services/pdf.service"
+
+function readPdfText(certCode: string) {
+  const filepath = getCertificateFilePath(certCode)
+  expect(filepath).not.toBeNull()
+  return fs.readFileSync(filepath!)
+}
 
 describe("generateCertificatePdf", () => {
   test("renders unicode course titles without using default Helvetica", async () => {
@@ -15,25 +20,22 @@ describe("generateCertificatePdf", () => {
       studentId: "FXP-2026-00001",
       courseTitle,
       issuedAt: new Date("2026-06-11T00:00:00.000Z"),
-      instructorName: "FX Prime Academy",
+      instructorName: "Phynix Education",
     })
 
     expect(pdfUrl).toBe(`/api/v1/certificates/${certCode}/download`)
 
-    const filepath = getCertificateFilePath(certCode)
-    expect(filepath).not.toBeNull()
-
-    const pdfBuffer = fs.readFileSync(filepath!)
+    const pdfBuffer = readPdfText(certCode)
     expect(pdfBuffer.length).toBeGreaterThan(1000)
     expect(pdfBuffer.subarray(0, 4).toString()).toBe("%PDF")
 
     const pdfText = pdfBuffer.toString("latin1")
     expect(pdfText).toContain("NotoSansBengali-Regular")
     expect(pdfText).toContain("NotoSans-Regular")
-    expect(pdfText).toContain("Beginner")
+    expect(pdfText).toContain("/Count 1")
     expect(pdfText).not.toContain("/Helvetica")
 
-    fs.unlinkSync(filepath!)
+    fs.unlinkSync(getCertificateFilePath(certCode)!)
   })
 
   test("uses NotoSans for latin-only course titles", async () => {
@@ -46,15 +48,15 @@ describe("generateCertificatePdf", () => {
       studentId: "FXP-2026-00002",
       courseTitle,
       issuedAt: new Date("2026-06-11T00:00:00.000Z"),
-      instructorName: "FX Prime Academy",
+      instructorName: "Phynix Education",
     })
 
-    const filepath = getCertificateFilePath(certCode)
-    const pdfBuffer = fs.readFileSync(filepath!)
+    const pdfBuffer = readPdfText(certCode)
     const pdfText = pdfBuffer.toString("latin1")
     expect(pdfText).toContain("NotoSans-Regular")
+    expect(pdfText).toContain("/Count 1")
     expect(pdfText).not.toContain("/Helvetica")
 
-    fs.unlinkSync(filepath!)
+    fs.unlinkSync(getCertificateFilePath(certCode)!)
   })
 })

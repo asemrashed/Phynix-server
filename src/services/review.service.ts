@@ -73,6 +73,28 @@ export async function getStudentCourseReview(
   }
 }
 
+export async function listRecentCourseReviews(limit = 6) {
+  const reviews = await prisma.courseReview.findMany({
+    where: { review: { not: null } },
+    include: {
+      student: { select: { firstName: true, lastName: true, avatarUrl: true } },
+      course: { select: { title: true } },
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  })
+
+  return reviews.map((r) => ({
+    id: r.id,
+    rating: r.rating,
+    review: r.review,
+    studentName: `${r.student.firstName} ${r.student.lastName.charAt(0)}.`,
+    studentAvatar: r.student.avatarUrl,
+    courseName: r.course.title,
+    createdAt: r.createdAt.toISOString(),
+  }))
+}
+
 export async function listCourseReviews(courseId: string, limit = 20) {
   const reviews = await prisma.courseReview.findMany({
     where: { courseId },

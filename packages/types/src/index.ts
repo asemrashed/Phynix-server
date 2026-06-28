@@ -201,6 +201,11 @@ export interface CourseReviewItem {
   isOwn?: boolean
 }
 
+export interface HomepageCourseReviewItem extends CourseReviewItem {
+  studentAvatar: string | null
+  courseName: string
+}
+
 export interface SubmitCourseReviewRequest {
   rating: number
   review?: string

@@ -17,6 +17,7 @@ import studentsRoutes from "./students.routes"
 import searchRoutes from "./search.routes"
 import instructorRoutes from "./instructor.routes"
 import testimonialRoutes from "./testimonials.routes"
+import reviewRoutes from "./reviews.routes"
 import contactRoutes from "./contact.routes"
 import siteRoutes from "./site.routes"
 
@@ -44,6 +45,7 @@ router.use("/students", studentsRoutes)
 router.use("/search", searchRoutes)
 router.use("/instructor", instructorRoutes)
 router.use("/testimonials", testimonialRoutes)
+router.use("/reviews", reviewRoutes)
 router.use("/contact", contactRoutes)
 router.use("/site", siteRoutes)
 

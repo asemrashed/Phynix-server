@@ -132,105 +132,218 @@ interface CertificatePdfData {
   instructorName: string
 }
 
+const CERT_PLATFORM_NAME = "Phynix Education"
+const CERT_GREEN = "#1B4332"
+const CERT_NAVY = "#1B2A4A"
+const CERT_MUTED = "#9CA3AF"
+const CERT_BEIGE = "#F5F0E6"
+
+function drawCertificateBorder(doc: PDFKit.PDFDocument) {
+  const { width: w, height: h } = doc.page
+  const outer = 26
+  const frameW = w - outer * 2
+  const frameH = h - outer * 2
+
+  doc.rect(0, 0, w, h).fill(CERT_BEIGE)
+
+  doc.lineWidth(5).strokeColor(CERT_GREEN).rect(outer, outer, frameW, frameH).stroke()
+
+  const dotR = 4
+  const corners: Array<[number, number]> = [
+    [outer, outer],
+    [outer + frameW, outer],
+    [outer, outer + frameH],
+    [outer + frameW, outer + frameH],
+  ]
+  for (const [cx, cy] of corners) {
+    doc.circle(cx, cy, dotR).fill("#FFFFFF")
+    doc.circle(cx, cy, dotR).lineWidth(1).strokeColor(CERT_GREEN).stroke()
+  }
+
+  const inset = 12
+  const ix = outer + inset
+  const iy = outer + inset
+  const iw = frameW - inset * 2
+  const ih = frameH - inset * 2
+
+  doc.lineWidth(1).strokeColor("#FFFFFF").rect(ix, iy, iw, ih).stroke()
+  doc.lineWidth(1.2).strokeColor(CERT_GREEN).rect(ix + 3, iy + 3, iw - 6, ih - 6).stroke()
+}
+
+function drawCertificateRule(
+  doc: PDFKit.PDFDocument,
+  centerX: number,
+  y: number,
+  ruleWidth: number
+) {
+  doc
+    .moveTo(centerX - ruleWidth / 2, y)
+    .lineTo(centerX + ruleWidth / 2, y)
+    .lineWidth(0.6)
+    .strokeColor(CERT_MUTED)
+    .stroke()
+}
+
+function drawAwardSeal(doc: PDFKit.PDFDocument, centerX: number, centerY: number, year: number) {
+  const radius = 34
+
+  doc.circle(centerX, centerY, radius).lineWidth(1.4).strokeColor(CERT_GREEN).stroke()
+  doc
+    .circle(centerX, centerY, radius - 6)
+    .lineWidth(0.8)
+    .dash(3, { space: 2 })
+    .strokeColor(CERT_GREEN)
+    .stroke()
+  doc.undash()
+
+  doc
+    .font("NotoSans")
+    .fontSize(7)
+    .fillColor(CERT_GREEN)
+    .text("AWARDED", centerX - 28, centerY - 10, { width: 56, align: "center", lineBreak: false })
+  doc
+    .fontSize(11)
+    .text(String(year), centerX - 28, centerY + 2, { width: 56, align: "center", lineBreak: false })
+}
+
 export async function generateCertificatePdf(data: CertificatePdfData): Promise<string> {
   ensureCertDir()
   ensureCertificateFonts()
 
-  const verifyUrl = getCertificateVerifyUrl(data.certCode)
-  const qrDataUrl = await QRCode.toDataURL(verifyUrl, {
-    width: 140,
-    margin: 2,
-    errorCorrectionLevel: "M",
-  })
-  const qrBase64 = qrDataUrl.replace(/^data:image\/png;base64,/, "")
-  const qrBuffer = Buffer.from(qrBase64, "base64")
-
   const filename = `${data.certCode}.pdf`
   const filepath = path.join(CERT_DIR, filename)
+  const issuedLabel = data.issuedAt.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })
+  const awardYear = data.issuedAt.getFullYear()
 
   await new Promise<void>((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A4", layout: "landscape", margin: 50 })
+    const doc = new PDFDocument({
+      size: "A4",
+      layout: "landscape",
+      margin: 0,
+      autoFirstPage: true,
+    })
     const stream = fs.createWriteStream(filepath)
 
     doc.pipe(stream)
     doc.registerFont("NotoSans", FONT_REGULAR)
     doc.registerFont("NotoSansBengali", FONT_BENGALI)
 
-    const margin = 50
-    doc
-      .lineWidth(2)
-      .strokeColor("#0F766E")
-      .rect(margin - 10, margin - 10, doc.page.width - 2 * margin + 20, doc.page.height - 2 * margin + 20)
-      .stroke()
+    drawCertificateBorder(doc)
+
+    const pageW = doc.page.width
+    const pageH = doc.page.height
+    const centerX = pageW / 2
+    const contentLeft = 72
+    const contentWidth = pageW - contentLeft * 2
 
     doc
-      .lineWidth(0.5)
-      .strokeColor("#94A3B8")
-      .rect(margin, margin, doc.page.width - 2 * margin, doc.page.height - 2 * margin)
-      .stroke()
+      .font("NotoSans")
+      .fontSize(18)
+      .fillColor(CERT_NAVY)
+      .text(CERT_PLATFORM_NAME, contentLeft, 40, {
+        width: contentWidth,
+        align: "center",
+        lineBreak: false,
+      })
+
+    doc
+      .fontSize(30)
+      .fillColor(CERT_NAVY)
+      .text("Certificate of Completion", contentLeft, 92, {
+        width: contentWidth,
+        align: "center",
+        lineBreak: false,
+      })
+
+    doc
+      .fontSize(9)
+      .fillColor(CERT_MUTED)
+      .text("THIS IS TO CERTIFY THAT", contentLeft, 142, {
+        width: contentWidth,
+        align: "center",
+        characterSpacing: 1.5,
+        lineBreak: false,
+      })
+
+    drawCertificateRule(doc, centerX, 172, 360)
+
+    doc.x = contentLeft
+    doc.y = 180
+    doc.fontSize(24).fillColor(CERT_NAVY)
+    writeMixedScriptText(doc, data.studentName, {
+      align: "center",
+      width: contentWidth,
+    })
 
     doc
       .font("NotoSans")
       .fontSize(10)
-      .fillColor("#0F766E")
-      .text("FX PRIME ACADEMY", { align: "center" })
-
-    doc.moveDown(0.5)
-    doc
-      .fontSize(28)
-      .fillColor("#0F172A")
-      .text("Certificate of Completion", { align: "center" })
-
-    doc.moveDown(1)
-    doc
-      .fontSize(12)
-      .fillColor("#64748B")
-      .text("This is to certify that", { align: "center" })
-
-    doc.moveDown(0.5)
-    doc.fontSize(24).fillColor("#0F172A")
-    writeMixedScriptText(doc, data.studentName, { align: "center" })
-
-    doc.moveDown(0.3)
-    doc
-      .font("NotoSans")
-      .fontSize(11)
-      .fillColor("#64748B")
-      .text(`Student ID: ${data.studentId}`, { align: "center" })
-
-    doc.moveDown(1)
-    doc
-      .fontSize(12)
-      .fillColor("#64748B")
-      .text("has successfully completed the course", { align: "center" })
-
-    doc.moveDown(0.5)
-    doc.fontSize(20).fillColor("#0F766E")
-    writeMixedScriptText(doc, data.courseTitle, { align: "center" })
-
-    doc.moveDown(1.5)
-    doc
-      .font("NotoSans")
-      .fontSize(11)
-      .fillColor("#64748B")
-      .text(`Issued: ${data.issuedAt.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`, {
+      .fillColor(CERT_MUTED)
+      .text("has successfully completed the course", contentLeft, 232, {
+        width: contentWidth,
         align: "center",
+        lineBreak: false,
       })
 
-    doc.moveDown(0.3)
-    doc.fontSize(11).fillColor("#64748B")
-    writeMixedScriptText(doc, `Instructor: ${data.instructorName}`, { align: "center" })
-    doc.moveDown(0.3)
-    doc.font("NotoSans").text(`Certificate Code: ${data.certCode}`, { align: "center" })
+    drawCertificateRule(doc, centerX, 268, 280)
 
-    const qrX = doc.page.width - 50 - 100
-    const qrY = doc.page.height - 50 - 100
-    doc.image(qrBuffer, qrX, qrY, { width: 100, height: 100 })
+    doc.x = contentLeft
+    doc.y = 276
+    doc.fontSize(18).fillColor(CERT_GREEN)
+    writeMixedScriptText(doc, data.courseTitle, {
+      align: "center",
+      width: contentWidth,
+    })
+
+    doc.x = contentLeft
+    doc.y = 312
+    doc
+      .font("NotoSans")
+      .fontSize(9)
+      .fillColor(CERT_MUTED)
+    writeMixedScriptText(doc, `Instructor: ${data.instructorName}`, {
+      align: "center",
+      width: contentWidth,
+    })
+
+    const footerY = pageH - 118
+    const sigLineY = footerY + 18
+    const sigLineW = 130
+
+    drawCertificateRule(doc, centerX - 150, sigLineY, sigLineW)
+    drawCertificateRule(doc, centerX + 150, sigLineY, sigLineW)
+    drawAwardSeal(doc, centerX, footerY + 8, awardYear)
+
     doc
       .font("NotoSans")
       .fontSize(8)
-      .fillColor("#94A3B8")
-      .text("Scan to verify", qrX, qrY + 105, { width: 100, align: "center" })
+      .fillColor(CERT_NAVY)
+      .text(`Certificate ID: ${data.certCode}`, centerX - 230, sigLineY + 10, {
+        width: 200,
+        lineBreak: false,
+      })
+
+    doc
+      .font("NotoSans")
+      .fontSize(8)
+      .fillColor(CERT_NAVY)
+      .text(`Issuing Date: ${issuedLabel}`, centerX + 30, sigLineY + 10, {
+        width: 200,
+        lineBreak: false,
+      })
+
+    doc
+      .fontSize(8)
+      .fillColor(CERT_MUTED)
+      .text(`Student ID: ${data.studentId}`, contentLeft, pageH - 42, {
+        width: contentWidth,
+        align: "center",
+        lineBreak: false,
+      })
 
     doc.end()
 
